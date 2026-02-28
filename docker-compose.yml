@@ -1,0 +1,18 @@
+services:
+  dev:
+    build: .
+    image: dev-env
+    volumes:
+      - dev-persist:/home/dev/persist
+    stdin_open: true
+    tty: true
+    cap_add:
+      - SYS_PTRACE   # GDB, Valgrind
+      - PERFMON      # perf kernel profiling (Linux 5.8+)
+    security_opt:
+      - seccomp:unconfined
+    hostname: dev
+
+volumes:
+  dev-persist:
+    name: dev-persist
