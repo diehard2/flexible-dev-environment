@@ -1,7 +1,6 @@
 services:
   dev:
-    build: .
-    image: dev-env
+    image: 1div0/dev-env:latest
     volumes:
       - dev-persist:/home/dev/persist
     stdin_open: true
