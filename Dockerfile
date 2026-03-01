@@ -13,6 +13,8 @@ RUN dnf -y update && \
 # Enable CRB repo and install dev toolchain
 RUN dnf config-manager --set-enabled crb && \
     dnf -y install \
+    gcc \
+    gcc-c++ \
     gcc-toolset-15 \
     gcc-toolset-15-binutils \
     gcc-toolset-15-gcc \
