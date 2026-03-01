@@ -10,12 +10,14 @@ RUN dnf -y update && \
     sudo \
     && dnf clean all
 
-# Enable PowerTools/CRB repo and install dev toolchain
+# Enable CRB repo and install dev toolchain
 RUN dnf config-manager --set-enabled crb && \
     dnf -y install \
-    gcc-toolset-14 \
-    gcc-toolset-14-binutils \
-    gcc-toolset-14-gdb \
+    gcc-toolset-15 \
+    gcc-toolset-15-binutils \
+    gcc-toolset-15-gcc \
+    gcc-toolset-15-gcc-c++ \
+    gcc-toolset-15-gdb \
     valgrind \
     cmake \
     ninja-build \
@@ -69,7 +71,7 @@ RUN cat >> /home/dev/.bashrc << 'EOF'
 [[ -f ~/.bashrc.personal ]] && source ~/.bashrc.personal
 
 # Toolset
-source scl_source enable gcc-toolset-14
+source scl_source enable gcc-toolset-15
 export CC=$(which gcc)
 export CXX=$(which g++)
 
