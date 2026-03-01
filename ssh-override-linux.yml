@@ -1,0 +1,6 @@
+services:
+  dev:
+    volumes:
+      - ${SSH_AUTH_SOCK}:/home/dev/.ssh_auth_sock:ro
+    environment:
+      - SSH_AUTH_SOCK=/home/dev/.ssh_auth_sock

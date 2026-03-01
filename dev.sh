@@ -13,14 +13,17 @@ EOF
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Ensure SSH agent is running and key is loaded
-if [[ -z "${SSH_AUTH_SOCK:-}" ]] || ! ssh-add -l &>/dev/null; then
-    unset SSH_AUTH_SOCK SSH_AGENT_PID
-    eval "$(ssh-agent -s)" > /dev/null
+# macOS manages the agent via Keychain; only needed on Linux/WSL2
+if [[ "$(uname)" != "Darwin" ]]; then
+    if [[ -z "${SSH_AUTH_SOCK:-}" ]] || ! ssh-add -l &>/dev/null; then
+        unset SSH_AUTH_SOCK SSH_AGENT_PID
+        eval "$(ssh-agent -s)" > /dev/null
+    fi
+    if ! ssh-add -l &>/dev/null; then
+        ssh-add ~/.ssh/id_ed25519 2>/dev/null || true
+    fi
+    export SSH_AUTH_SOCK
 fi
-if ! ssh-add -l &>/dev/null; then
-    ssh-add ~/.ssh/id_ed25519 2>/dev/null || true
-fi
-export SSH_AUTH_SOCK
 
 resolve_project_dir() {
     local raw_dir="$1"
@@ -51,6 +54,11 @@ fi
 
 # Build compose file list (shared by both startup and shutdown)
 COMPOSE_FILES=(-f "$SCRIPT_DIR/docker-compose.yml" -f "$SCRIPT_DIR/project-override.yml")
+if [[ "$(uname)" == "Darwin" ]]; then
+    COMPOSE_FILES+=(-f "$SCRIPT_DIR/ssh-override-mac.yml")
+else
+    COMPOSE_FILES+=(-f "$SCRIPT_DIR/ssh-override-linux.yml")
+fi
 [[ -f "$PROJECT_DIR/docker-compose.yml" && "$PROJECT_DIR" != "$SCRIPT_DIR" ]] && COMPOSE_FILES+=(-f "$PROJECT_DIR/docker-compose.yml")
 
 if $SHUTDOWN; then
@@ -66,6 +74,19 @@ COMPOSE_CMD=(docker compose -p "$PROJECT_NAME" "${COMPOSE_FILES[@]}")
 
 # Ensure mcp-proxy is running so Claude Code can reach MCP servers
 "$SCRIPT_DIR/mcp-proxy.sh" --status &>/dev/null || "$SCRIPT_DIR/mcp-proxy.sh" --bg
+
+# Pull newer image if available; remove the container first so `up` recreates it
+_img=$("${COMPOSE_CMD[@]}" config 2>/dev/null | awk '/image:/ { print $2; exit }')
+if [[ -n "$_img" ]]; then
+    _before=$(docker image inspect "$_img" --format '{{.Id}}' 2>/dev/null || true)
+    docker pull --quiet "$_img" 2>/dev/null || true
+    _after=$(docker image inspect "$_img" --format '{{.Id}}' 2>/dev/null || true)
+    if [[ -n "$_after" && "$_before" != "$_after" ]]; then
+        echo "==> New image pulled, recreating container..."
+        "${COMPOSE_CMD[@]}" rm -sf dev 2>/dev/null || true
+    fi
+    unset _img _before _after
+fi
 
 # Start all services detached (tty+stdin_open keeps dev alive without a command override)
 if ! "${COMPOSE_CMD[@]}" up -d --no-recreate; then

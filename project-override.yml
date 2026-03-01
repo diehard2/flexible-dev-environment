@@ -3,9 +3,7 @@ services:
     volumes:
       - ${PROJECT_DIR}:/home/dev/${PROJECT_NAME}
       - ${BASHRC_FILE}:/home/dev/.bashrc.personal:ro
-      - $SSH_AUTH_SOCK:/home/dev/.ssh_auth_sock:ro
       - ~/.claude:/home/dev/.claude
       - ~/.claude.json:/home/dev/.claude.json
     environment:
-      - SSH_AUTH_SOCK=/home/dev/.ssh_auth_sock
       - GITHUB_TOKEN
