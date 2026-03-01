@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "docker": {
-      "command": "docker",
+      "command": "docker.exe",
       "args": ["mcp", "gateway", "run"]
     }
   }

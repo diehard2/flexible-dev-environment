@@ -72,6 +72,24 @@ fi
 
 COMPOSE_CMD=(docker compose -p "$PROJECT_NAME" "${COMPOSE_FILES[@]}")
 
+# Patch the docker MCP server command for this platform
+if [[ "$(uname)" == "Darwin" ]]; then
+    _docker_cmd="docker"
+else
+    _docker_cmd="docker.exe"
+fi
+python3 - "$SCRIPT_DIR/mcp-servers.json" "$_docker_cmd" <<'EOF'
+import json, sys
+path, cmd = sys.argv[1], sys.argv[2]
+with open(path) as f:
+    cfg = json.load(f)
+cfg.setdefault("mcpServers", {}).setdefault("docker", {})["command"] = cmd
+with open(path, "w") as f:
+    json.dump(cfg, f, indent=2)
+    f.write("\n")
+EOF
+unset _docker_cmd
+
 # Ensure mcp-proxy is running so Claude Code can reach MCP servers
 "$SCRIPT_DIR/mcp-proxy.sh" --status &>/dev/null || "$SCRIPT_DIR/mcp-proxy.sh" --bg
 
