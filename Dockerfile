@@ -8,6 +8,8 @@ RUN dnf -y update && \
     nano \
     git \
     sudo \
+    procps-ng \
+    which \
     && dnf clean all
 
 # Enable CRB repo and install dev toolchain
@@ -73,7 +75,7 @@ RUN cat >> /home/dev/.bashrc << 'EOF'
 [[ -f ~/.bashrc.personal ]] && source ~/.bashrc.personal
 
 # Toolset
-source scl_source enable gcc-toolset-15
+source /opt/rh/gcc-toolset-15/enable
 export CC=$(which gcc)
 export CXX=$(which g++)
 

@@ -11,7 +11,10 @@ services:
     security_opt:
       - seccomp:unconfined
     hostname: dev
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 volumes:
   dev-persist:
     name: dev-persist
+    external: true

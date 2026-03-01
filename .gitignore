@@ -1,1 +1,3 @@
 .claude/
+.mcp-proxy.pid
+.mcp-proxy.log

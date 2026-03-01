@@ -64,6 +64,9 @@ fi
 
 COMPOSE_CMD=(docker compose -p "$PROJECT_NAME" "${COMPOSE_FILES[@]}")
 
+# Ensure mcp-proxy is running so Claude Code can reach MCP servers
+"$SCRIPT_DIR/mcp-proxy.sh" --status &>/dev/null || "$SCRIPT_DIR/mcp-proxy.sh" --bg
+
 # Start all services detached (tty+stdin_open keeps dev alive without a command override)
 if ! "${COMPOSE_CMD[@]}" up -d --no-recreate; then
     echo "Error: Failed to start services for '$PROJECT_NAME'" >&2
