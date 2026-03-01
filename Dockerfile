@@ -1,4 +1,4 @@
-FROM rockylinux/rockylinux:latest
+FROM rockylinux/rockylinux:10
 
 # Update the system and install basic utilities
 RUN dnf -y update && \
@@ -11,7 +11,7 @@ RUN dnf -y update && \
     && dnf clean all
 
 # Enable PowerTools/CRB repo and install dev toolchain
-RUN dnf config-manager --set-enabled powertools && \
+RUN dnf config-manager --set-enabled crb && \
     dnf -y install \
     gcc-toolset-14 \
     gcc-toolset-14-binutils \
