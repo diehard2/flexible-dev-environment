@@ -17,7 +17,7 @@ RUN dnf config-manager --set-enabled crb && \
     gcc-toolset-15-binutils \
     gcc-toolset-15-gcc \
     gcc-toolset-15-gcc-c++ \
-    gcc-toolset-15-gdb \
+    gdb \
     valgrind \
     cmake \
     ninja-build \
