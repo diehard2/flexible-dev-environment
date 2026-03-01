@@ -97,7 +97,7 @@ unset _docker_cmd
 _img=$("${COMPOSE_CMD[@]}" config 2>/dev/null | awk '/image:/ { print $2; exit }')
 if [[ -n "$_img" ]]; then
     _before=$(docker image inspect "$_img" --format '{{.Id}}' 2>/dev/null || true)
-    docker pull --quiet "$_img" 2>/dev/null || true
+    docker pull "$_img" || true
     _after=$(docker image inspect "$_img" --format '{{.Id}}' 2>/dev/null || true)
     if [[ -n "$_after" && "$_before" != "$_after" ]]; then
         echo "==> New image pulled, recreating container..."
